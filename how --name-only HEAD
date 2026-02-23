@@ -1,0 +1,12 @@
+*   [33mc23d452[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Merge branch 'main' of https://github.com/frinkietech/invoice-gen
+[31m|[m[32m\[m  
+[31m|[m * [33m0c1888c[m add README.md for project documentation and remove invoice-gen.html
+[31m|[m * [33mbb6f292[m add vercel.json for deployment configuration
+[31m|[m * [33m0dab3cc[m add generate-invoice.js for serverless invoice computation and HTML rendering
+[31m|[m * [33mace18fc[m add index.html for invoice generation functionality
+* [32m|[m [33m0416c35[m Ignore dev-server.js
+* [32m|[m [33mc9ecf9e[m add dev-server.js and package.json for server setup
+* [32m|[m [33mfaad320[m add index.html for invoice generation functionality
+[32m|[m[32m/[m  
+* [33m818a851[m add .gitignore to exclude Vercel and local environment files
+* [33m35b3aae[m initial commit
