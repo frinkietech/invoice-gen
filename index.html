@@ -161,7 +161,11 @@
   <script>
     const STORAGE_KEY = 'invoiceData';
     const INVOICE_COUNTER_KEY = 'invoiceCounter';
-    window.currentLogo = '';
+    
+    // FrinkieTech Network logo as SVG data URI
+    const DEFAULT_LOGO_SVG = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDMyMCAxNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHN0eWxlPi5sb2dvLXRleHQtbGFyZ2UgeyBmb250LXNpemU6IDc2cHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmYW1pbHk6IEFyaWFsLCBzYW5zLXNlcmlmOyB9IC5sb2dvLXRleHQtc21hbGwgeyBmb250LXNpemU6IDM2cHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmYW1pbHk6IEFyaWFsLCBzYW5zLXNlcmlmOyBsZXR0ZXItc3BhY2luZzogMnB4OyB9IC5sb2dvLXRleHQtZGFyayB7IGZpbGw6ICMwRjI2NDg7IH0gLmxvZ28tdGV4dC1ibHVlIHsgZmlsbDogIzE0NThDNjsgfTwvc3R5bGU+PC9kZWZzPjx0ZXh0IHg9IjEwIiB5PSI5MCIgY2xhc3M9ImxvZ28tdGV4dC1sYXJnZSBsb2dvLXRleHQtZGFyayI+RnJpbmtpZTwvdGV4dD48dGV4dCB4PSIyNjAiIHk9IjkwIiBjbGFzcz0ibG9nby10ZXh0LWxhcmdlIGxvZ28tdGV4dC1ibHVlIj5UZWNIPC90ZXh0Pjx0ZXh0IHg9IjUwIiB5PSIxMzAiIGNsYXNzPSJsb2dvLXRleHQtc21hbGwgbG9nby10ZXh0LWRhcmsiPk5FVFdPUks8L3RleHQ+PGNpcmNsZSBjeD0iMjcwIiBjeT0iNDUiIHI9IjI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMxNDU4QzYiIHN0cm9rZS13aWR0aD0iMyIvPjxjaXJjbGUgY3g9IjI3MCIgY3k9IjQ1IiByPSIxOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTQ1OEM2IiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIyNzAiIGN5PSI0NSIgcj0iMyIgZmlsbD0iIzE0NThDNiIvPjwvc3ZnPg==';
+    
+    window.currentLogo = DEFAULT_LOGO_SVG;
 
     function formatCurrency(val, currency='KES'){
       return new Intl.NumberFormat('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(val).replace('KES ','');
@@ -195,6 +199,7 @@
 
     function loadData(){
       const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      let logoDisplayed = false;
       Object.keys(data).forEach(k=>{
         if(k === 'logo' && data[k]){
           window.currentLogo = data[k];
@@ -203,11 +208,16 @@
           img.id = 'logoPreview';
           document.getElementById('logoContainer').innerHTML = '';
           document.getElementById('logoContainer').appendChild(img);
+          logoDisplayed = true;
         } else {
           const el = document.getElementById(k);
           if(el) el.value = data[k];
         }
       });
+      // Use default logo if no custom logo in localStorage
+      if(!logoDisplayed){
+        window.currentLogo = DEFAULT_LOGO_SVG;
+      }
     }
 
     function validateForm(){
@@ -377,6 +387,14 @@
 
     // Initialize
     loadData();
+    // Show default logo if not customized
+    if(!window.currentLogo || window.currentLogo === DEFAULT_LOGO_SVG){
+      const img = document.createElement('img');
+      img.src = DEFAULT_LOGO_SVG;
+      img.id = 'logoPreview';
+      document.getElementById('logoContainer').innerHTML = '';
+      document.getElementById('logoContainer').appendChild(img);
+    }
     const {num} = getInvoiceNumber();
     if(!document.getElementById('invoiceNo').value) document.getElementById('invoiceNo').value = num;
     if(!document.getElementById('issueDate').value) document.getElementById('issueDate').valueAsDate = new Date();
