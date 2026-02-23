@@ -44,3 +44,4 @@ Thumbs.db
 
 # Unnecessary file (kept per earlier change)
 unnecessary.file
+dev-server.js
