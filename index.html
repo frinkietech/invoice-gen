@@ -48,6 +48,8 @@
     .preview-section h3{border-bottom:3px solid #7c3aed;padding-bottom:8px;display:inline-block;margin:0 0 12px;font-size:14px}
     .preview-items{margin:30px 0}
     .preview-items table{font-size:13px}
+    #logoPreview{max-width:100px;max-height:100px;border-radius:8px;margin-top:8px}
+    .logo-container{margin-top:8px}
     .preview-totals{text-align:right;margin-top:30px}
     .preview-totals-box{display:inline-block;background:#f3f4f6;padding:16px 30px;border-radius:8px}
     .preview-totals-row{display:flex;justify-content:space-between;gap:30px;font-size:14px;margin:8px 0}
@@ -69,6 +71,9 @@
           <textarea id="companyAddress" rows="3"></textarea>
           <label>Company Phone</label>
           <input id="companyPhone" type="tel" />
+          <label>Company Logo</label>
+          <input id="logoUpload" type="file" accept="image/*" />
+          <div class="logo-container" id="logoContainer"></div>
         </div>
         <div>
           <label>Invoice Number</label>
@@ -156,6 +161,7 @@
   <script>
     const STORAGE_KEY = 'invoiceData';
     const INVOICE_COUNTER_KEY = 'invoiceCounter';
+    window.currentLogo = '';
 
     function formatCurrency(val, currency='KES'){
       return new Intl.NumberFormat('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(val).replace('KES ','');
@@ -181,7 +187,8 @@
         currency:document.getElementById('currency').value,
         notes:document.getElementById('notes').value,
         taxRate:document.getElementById('taxRate').value,
-        discountRate:document.getElementById('discountRate').value
+        discountRate:document.getElementById('discountRate').value,
+        logo:window.currentLogo || ''
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
@@ -189,8 +196,17 @@
     function loadData(){
       const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       Object.keys(data).forEach(k=>{
-        const el = document.getElementById(k);
-        if(el) el.value = data[k];
+        if(k === 'logo' && data[k]){
+          window.currentLogo = data[k];
+          const img = document.createElement('img');
+          img.src = data[k];
+          img.id = 'logoPreview';
+          document.getElementById('logoContainer').innerHTML = '';
+          document.getElementById('logoContainer').appendChild(img);
+        } else {
+          const el = document.getElementById(k);
+          if(el) el.value = data[k];
+        }
       });
     }
 
@@ -273,7 +289,8 @@
 
       document.getElementById('preview').innerHTML = `
         <div class="preview-header">
-          <div>
+          <div style="display:flex;align-items:center;gap:16px">
+            ${window.currentLogo ? `<img src="${window.currentLogo}" style="height:60px;border-radius:8px;max-width:100px">` : ''}
             <h1>${document.getElementById('companyName').value}</h1>
           </div>
           <div class="preview-header-right">
@@ -382,6 +399,24 @@
     document.querySelectorAll('#itemsTable input, #taxRate, #discountRate').forEach(i=>i.addEventListener('input',calculateTotal));
     document.getElementById('previewBtn').addEventListener('click',previewInvoice);
     document.getElementById('downloadBtn').addEventListener('click',downloadPDF);
+
+    // Logo upload handler
+    document.getElementById('logoUpload').addEventListener('change',(e)=>{
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = (event)=>{
+          window.currentLogo = event.target.result;
+          const img = document.createElement('img');
+          img.src = window.currentLogo;
+          img.id = 'logoPreview';
+          document.getElementById('logoContainer').innerHTML = '';
+          document.getElementById('logoContainer').appendChild(img);
+          saveData();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
     calculateTotal();
   </script>
