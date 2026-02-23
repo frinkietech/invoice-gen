@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Invoice Generator</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <style>
+    /* Minimal page styles derived from existing invoice-gen.html */
+    :root{--accent:#6d28d9}
+    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#f3f4f6;margin:0;padding:24px}
+    .wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.08)}
+    h1{color:var(--accent);margin:0 0 12px}
+    .card{background:#fafafa;padding:18px;border-radius:10px;border:1px solid #e6e7ee;margin-bottom:18px}
+    label{display:block;margin:10px 0 6px;font-weight:600;color:#374151}
+    input,textarea,select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border:1px solid #e5e7eb}
+    .actions{display:flex;gap:8px;justify-content:flex-start}
+    button{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:8px;cursor:pointer}
+    .hidden{display:none}
+    .muted{color:#6b7280}
+    @media (max-width:720px){.grid{display:block}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Invoice Generator</h1>
+    <div class="card">
+      <strong>Notes:</strong> This project is Vercel-ready. Use the form to create an invoice locally or post to the API at <code>/api/generate-invoice</code> to get server-rendered HTML.
+    </div>
+
+    <!-- Reuse your form fields (simplified) -->
+    <div class="card">
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Company Name</label>
+          <input id="companyName" value="FrinkieTech Network" />
+          <label>Company Address</label>
+          <textarea id="companyAddress">Juja, Kiambu 00900
+Kenya</textarea>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Client Name</label>
+          <input id="clientName" value="Delights Labs Technologies" />
+          <label>Client Address</label>
+          <textarea id="clientAddress">Nairobi
+Kenya</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="muted">Items</h3>
+      <table id="itemsTable">
+        <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input class="desc" value="Continued Network infrastructure on call support & Network configuration training" /></td>
+            <td><input class="qty" type="number" value="1" min="1" style="width:70px"/></td>
+            <td><input class="price" type="number" value="1000" step="0.01" style="width:120px"/></td>
+            <td class="lineTotal">KES 1,000.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px" class="actions">
+        <button id="addItem">Add Item</button>
+        <button id="previewBtn">Preview</button>
+        <button id="serverBtn">Send to API</button>
+      </div>
+    </div>
+
+    <div id="preview" class="card hidden"></div>
+    <div id="apiResult" class="card hidden"></div>
+  </div>
+
+  <script>
+    // Basic frontend: calculate totals, preview and POST to API
+    function calculateTotal(){
+      let total=0; document.querySelectorAll('#itemsTable tbody tr').forEach(row=>{
+        const qty=Number(row.querySelector('.qty').value)||0; const price=Number(row.querySelector('.price').value)||0; const amt=qty*price; row.querySelector('.lineTotal').textContent='KES '+amt.toLocaleString('en-KE',{minimumFractionDigits:2}); total+=amt;
+      }); return total;
+    }
+    document.getElementById('addItem').addEventListener('click',()=>{
+      const tbody=document.querySelector('#itemsTable tbody'); const row=document.createElement('tr'); row.innerHTML=`<td><input class="desc"/></td><td><input class="qty" type="number" value="1" style="width:70px"/></td><td><input class="price" type="number" value="0" step="0.01" style="width:120px"/></td><td class="lineTotal">KES 0.00</td>`; tbody.appendChild(row); row.querySelectorAll('input').forEach(i=>i.addEventListener('input',calculateTotal));
+    });
+    document.querySelectorAll('#itemsTable input').forEach(i=>i.addEventListener('input',calculateTotal));
+
+    document.getElementById('previewBtn').addEventListener('click',()=>{
+      const total=calculateTotal(); const preview=document.getElementById('preview'); preview.innerHTML=`<h3>Preview</h3><p><strong>Company:</strong> ${document.getElementById('companyName').value}</p><p><strong>Client:</strong> ${document.getElementById('clientName').value}</p><p><strong>Total:</strong> KES ${total.toLocaleString('en-KE',{minimumFractionDigits:2})}</p>`; preview.classList.remove('hidden');
+    });
+
+    document.getElementById('serverBtn').addEventListener('click',async ()=>{
+      const items=[]; document.querySelectorAll('#itemsTable tbody tr').forEach(r=>items.push({desc:r.querySelector('.desc').value,qty:Number(r.querySelector('.qty').value)||0,price:Number(r.querySelector('.price').value)||0}));
+      const payload={company:{name:document.getElementById('companyName').value,address:document.getElementById('companyAddress').value},client:{name:document.getElementById('clientName').value,address:document.getElementById('clientAddress').value},items};
+      const res=await fetch('/api/generate-invoice',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
+      const json=await res.json(); const el=document.getElementById('apiResult'); el.innerHTML='<h3>API Result</h3><pre style="white-space:pre-wrap;max-height:300px;overflow:auto">'+(json.error?JSON.stringify(json,null,2):json.html)+'</pre>'; el.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
