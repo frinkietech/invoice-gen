@@ -1,2 +1,46 @@
 .vercel
 .env*.local
+
+# Vercel / environment
+.vercel
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Node modules and package manager files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build / output
+dist/
+build/
+.next/
+out/
+
+# Logs
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Misc
+*.secret
+*.key
+/.env.test
+
+# Unnecessary file (kept per earlier change)
+unnecessary.file
